@@ -1,6 +1,6 @@
 # Real-time E-sports Analytics Pipeline
 
-Vietnamese version: `README.md`
+Vietnamese version: `README_VIE.md`
 
 A production-oriented Data Engineering project for League of Legends match analytics, combining:
 - data collection from the Riot API
