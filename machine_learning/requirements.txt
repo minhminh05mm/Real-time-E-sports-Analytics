@@ -1,0 +1,8 @@
+clickhouse-driver
+joblib
+pandas
+python-dotenv
+riotwatcher
+scikit-learn
+tqdm
+xgboost

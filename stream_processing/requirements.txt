@@ -1,0 +1,6 @@
+clickhouse-driver
+joblib
+kafka-python
+pandas
+python-dotenv
+xgboost

@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+venv/
+data/clickhouse_data/
+machine_learning/data/*.csv
+machine_learning/models/*.pkl
+machine_learning/models/*.json
