@@ -1,48 +1,48 @@
 # Real-time E-sports Analytics Pipeline
 
-Vietnamese version: `README.md`
+English version: `README_EN.md`
 
-A production-oriented Data Engineering project for League of Legends match analytics, combining:
-- data collection from the Riot API
-- Kafka-based event streaming
-- real-time stream processing into ClickHouse
-- XGBoost-based win probability prediction
-- BI/dashboard consumption through Metabase
+Pipeline Data Engineering cho bài toán phân tích trận đấu League of Legends theo hướng real-time, kết hợp:
+- thu thập dữ liệu từ Riot API
+- phát sự kiện qua Kafka
+- xử lý stream và ghi vào ClickHouse
+- huấn luyện mô hình XGBoost để dự đoán win rate
+- phục vụ dashboard/BI qua Metabase
 
-This repository is structured in a modular, portfolio-ready way so it is easier to maintain, test, extend, and present on GitHub.
+Dự án được tổ chức theo kiểu production-oriented module để dễ mở rộng, test, và đưa lên GitHub/portfolio.
 
-## Project Goals
+## Mục tiêu dự án
 
-This project was built to demonstrate an end-to-end real-time analytics pipeline for e-sports data, with three main capabilities:
+Mục tiêu chính của dự án là xây dựng một hệ thống end-to-end cho bài toán Real-time E-sports Analytics với 3 lớp năng lực:
 
 1. Data Engineering:
-   collect League of Legends match data, simulate or publish real-time streams, process events, and store analytics-ready tables.
+   crawl dữ liệu trận đấu League of Legends, mô phỏng hoặc phát luồng dữ liệu thời gian thực, xử lý stream, và lưu trữ analytics-ready data.
 2. Machine Learning:
-   build training features from historical match data and train an XGBoost model to estimate win probability over time.
+   tạo feature dataset từ dữ liệu lịch sử, huấn luyện mô hình dự đoán xác suất thắng theo diễn biến trận đấu.
 3. Analytics / Visualization:
-   store processed data in ClickHouse so Metabase can query it directly and power dashboards.
+   đưa dữ liệu vào ClickHouse để Metabase có thể query trực tiếp và dựng dashboard theo thời gian thực.
 
-## Problem Statement
+## Bài toán mà dự án giải quyết
 
-Given LoL timeline data, the system aims to answer questions such as:
-- At minute `N`, what is Blue side's probability of winning?
-- How do gold difference, XP difference, and objectives influence the prediction?
-- Can we build dashboards by match, rank tier, patch, player pool, or champion composition?
+Với dữ liệu timeline của một trận LoL, hệ thống cố gắng trả lời các câu hỏi như:
+- Ở phút thứ `N`, đội xanh đang có bao nhiêu phần trăm cơ hội thắng?
+- Chênh lệch vàng, XP, objective ảnh hưởng thế nào đến dự đoán?
+- Có thể xây dashboard theo trận, theo rank, theo patch, theo champion pool hay không?
 
-## High-level Architecture
+## Kiến trúc tổng thể
 
-End-to-end data flow:
+Luồng dữ liệu tổng thể:
 
 1. `data_ingestion`
-   fetches players from a selected rank tier, retrieves match IDs from the Riot API, deduplicates by `match_id`, and publishes raw messages to Kafka.
+   lấy danh sách người chơi theo bậc rank được chọn, lấy match IDs từ Riot API, chống trùng theo `match_id`, rồi publish dữ liệu raw lên Kafka.
 2. `stream_processing`
-   consumes Kafka messages, separates `match_detail` and `timeline`, transforms them into analytics-ready rows, runs AI inference, and writes into ClickHouse.
+   consume dữ liệu từ Kafka, tách `match_detail` và `timeline`, làm phẳng dữ liệu, suy luận AI, rồi ghi vào ClickHouse.
 3. `machine_learning`
-   reads processed data from ClickHouse, creates a training dataset, trains the XGBoost model, and stores the model artifact.
+   đọc dữ liệu đã chuẩn hóa từ ClickHouse, tạo training dataset, huấn luyện XGBoost, lưu model.
 4. `Metabase`
-   connects directly to ClickHouse for dashboarding and exploration.
+   kết nối trực tiếp vào ClickHouse để dựng dashboard.
 
-Logical architecture:
+Kiến trúc logic:
 
 ```text
 Riot API
@@ -72,7 +72,7 @@ win_rate_model.pkl
 stream_processing / inference
 ```
 
-## Repository Structure
+## Cấu trúc thư mục
 
 ```text
 esports_analytics/
@@ -126,195 +126,194 @@ esports_analytics/
 ├── docker-compose.yml
 ├── .env
 ├── .gitignore
-├── README.md
-└── README_EN.md
+└── README.md
 ```
 
-## Module Responsibilities
+## Vai trò của từng module
 
 ### `infrastructure/`
-Contains the infrastructure layer required by the pipeline:
+Chứa phần hạ tầng cần cho pipeline:
 - Kafka + Zookeeper
 - Kafka UI
 - ClickHouse
 - Metabase
-- ClickHouse schema DDL
+- DDL schema cho ClickHouse
 
 ### `data_ingestion/`
-Responsible for publishing raw match data into Kafka.
+Chịu trách nhiệm phát dữ liệu raw lên Kafka.
 
-Key files:
-- `config.py`: ingestion configuration
-- `riot_api_client.py`: Riot API wrapper
-- `kafka_producer.py`: Kafka publishing utilities
-- `simulator_job.py`: real-time ingestion entrypoint
+Các thành phần chính:
+- `config.py`: cấu hình ingestion
+- `riot_api_client.py`: wrapper cho Riot API
+- `kafka_producer.py`: publish message vào Kafka
+- `simulator_job.py`: entrypoint chạy ingestion real-time
 
-Notes:
-- ingestion fetches all players from the selected rank tier
-- deduplication is handled by `match_id` across the entire run
-- if player A and player B belong to the same match, that match is published only once
+Lưu ý:
+- ingestion hiện lấy toàn bộ người chơi theo `tier` được chọn mỗi lần chạy
+- có chống trùng `match_id` trong toàn bộ lượt chạy
+- nếu người A và B cùng nằm trong một trận, trận đó chỉ được publish 1 lần
 
 ### `machine_learning/`
-Responsible for offline crawling, feature generation, and model training.
+Chịu trách nhiệm crawl lịch sử, tạo feature dataset, và huấn luyện model.
 
-Key files:
-- `historical_crawler.py`: offline crawler by selected rank tier, storing raw JSON
-- `feature_engineering.py`: creates the ML training dataset from ClickHouse
-- `train_xgboost.py`: trains and stores the XGBoost model
-- `config.py`: ML configuration
+Các thành phần chính:
+- `historical_crawler.py`: crawl offline theo rank tier, lưu raw JSON
+- `feature_engineering.py`: đọc dữ liệu từ ClickHouse và tạo dataset train
+- `train_xgboost.py`: train model XGBoost và lưu artifact
+- `config.py`: cấu hình ML
 
-Notes:
-- the offline crawler also deduplicates by `match_id`
-- the main model artifact is stored at `machine_learning/models/win_rate_model.pkl`
-- a legacy JSON model is still kept for backward compatibility
+Lưu ý:
+- offline crawler cũng chống trùng `match_id`
+- model chính hiện lưu ở `machine_learning/models/win_rate_model.pkl`
+- model legacy JSON vẫn được giữ để tương thích ngược
 
 ### `stream_processing/`
-Responsible for real-time consumption, transformation, inference, and persistence.
+Chịu trách nhiệm xử lý dữ liệu real-time và suy luận.
 
-Key files:
-- `consumer_job.py`: main Kafka consumer
-- `data_transformer.py`: converts raw payloads into insertable rows
-- `ai_inference.py`: loads the model, calculates scaling, and predicts win rate
-- `clickhouse_client.py`: ClickHouse connection and insert utilities
-- `check_data.py`: quick validation script for processed data
-- `clean_db.py`: truncates tables for testing
+Các thành phần chính:
+- `consumer_job.py`: consumer Kafka chính
+- `data_transformer.py`: transform raw payload thành row insertable
+- `ai_inference.py`: load model, tính scaling, predict win rate
+- `clickhouse_client.py`: kết nối/ghi ClickHouse
+- `check_data.py`: kiểm tra nhanh dữ liệu đã được ghi hay chưa
+- `clean_db.py`: truncate bảng phục vụ test
 
-## How the Modules Connect
+## Liên kết giữa các thư mục
 
-This is the core idea behind the repository:
+Đây là điểm quan trọng nhất để hiểu repo:
 
-- `data_ingestion` does not train the model
-- `machine_learning` does not consume Kafka
-- `stream_processing` does not crawl the Riot API
+- `data_ingestion` không train model
+- `machine_learning` không consume Kafka
+- `stream_processing` không crawl Riot API
 
-Each module has a dedicated responsibility, but they are connected through shared artifacts:
+Mỗi module có trách nhiệm riêng nhưng liên kết với nhau qua artifact chung:
 
 1. `data_ingestion` -> Kafka
-   publishes raw messages into topic `esports_raw_events`
+   publish raw messages vào topic `esports_raw_events`
 2. `stream_processing` -> ClickHouse
-   consumes Kafka and writes analytics tables
+   consume Kafka và ghi thành bảng phân tích
 3. `machine_learning` -> model artifact
-   reads from ClickHouse, trains a model, saves `win_rate_model.pkl`
+   đọc từ ClickHouse, train model, lưu `win_rate_model.pkl`
 4. `stream_processing` -> model artifact
-   loads the model from `machine_learning/models/` for real-time inference
+   load model từ `machine_learning/models/` để infer real-time
 
-## Main ClickHouse Tables
+## Các bảng chính trong ClickHouse
 
-The current schema includes:
-- `matches`: match-level metadata
-- `participants`: final per-player match statistics
-- `timeline_events`: important timeline events
-- `match_stats_per_minute`: minute-level snapshots used for ML features
-- `win_predictions`: minute-level win probability predictions
+Schema hiện tại gồm:
+- `matches`: thông tin chung của trận đấu
+- `participants`: thống kê cuối trận theo người chơi
+- `timeline_events`: các event quan trọng trong timeline
+- `match_stats_per_minute`: snapshot theo phút để phục vụ ML
+- `win_predictions`: kết quả dự đoán win rate theo phút
 
-## How to Run the Project
+## Cách chạy dự án
 
-### 1. Prepare the environment
+### 1. Chuẩn bị môi trường
 
-Update `.env` with a valid Riot API key:
+Cập nhật `.env` với Riot API key còn hạn:
 
 ```env
 RIOT_API_KEY=your_riot_api_key
 ```
 
-### 2. Start infrastructure
+### 2. Khởi động hạ tầng
 
-From the repository root:
+Chạy từ root repo:
 
 ```bash
 docker compose up -d
 ```
 
-Check the services:
+Kiểm tra service:
 
 ```bash
 docker compose ps
 docker compose logs -f
 ```
 
-### 3. Apply ClickHouse schema
+### 3. Apply schema ClickHouse
 
-If ClickHouse is already running with an existing volume, apply the schema manually:
+Nếu ClickHouse đang chạy với volume cũ, apply lại schema:
 
 ```bash
 ./venv/bin/python infrastructure/apply_clickhouse_schema.py
 ```
 
-### 4. Run stream processing
+### 4. Chạy stream processing
 
-Open terminal 1:
+Mở terminal 1:
 
 ```bash
 cd /home/minhminh05mm/esports_analytics
 ./venv/bin/python -m stream_processing.src.consumer_job
 ```
 
-### 5. Run real-time ingestion
+### 5. Chạy ingestion real-time
 
-Open terminal 2:
+Mở terminal 2:
 
 ```bash
 cd /home/minhminh05mm/esports_analytics
 ./venv/bin/python -m data_ingestion.src.simulator_job --tier CHALLENGER --target-match-count 50 --matches-per-player 25
 ```
 
-### 6. Validate processed data
+### 6. Kiểm tra dữ liệu đã được ghi
 
 ```bash
 ./venv/bin/python -m stream_processing.src.check_data
 ```
 
-### 7. Build features and train the model
+### 7. Tạo dataset và train AI
 
 ```bash
 ./venv/bin/python -m machine_learning.src.feature_engineering
 ./venv/bin/python -m machine_learning.src.train_xgboost
 ```
 
-## Offline Crawling
+## Cách crawl offline
 
 ```bash
 cd /home/minhminh05mm/esports_analytics
 ./venv/bin/python -m machine_learning.src.historical_crawler --tier CHALLENGER --target-match-count 50 --matches-per-player 25
 ```
 
-Examples:
+Ví dụ:
 
 ```bash
 ./venv/bin/python -m machine_learning.src.historical_crawler --tier MASTER --target-match-count 200 --matches-per-player 20
 ./venv/bin/python -m machine_learning.src.historical_crawler --tier GRANDMASTER --target-match-count 100 --matches-per-player 30
 ```
 
-## Real-time Ingestion with the Same Workflow
+## Cách chạy real-time theo cùng kiểu với offline
 
 ```bash
 cd /home/minhminh05mm/esports_analytics
 ./venv/bin/python -m data_ingestion.src.simulator_job --tier CHALLENGER --target-match-count 50 --matches-per-player 25
 ```
 
-Examples:
+Ví dụ:
 
 ```bash
 ./venv/bin/python -m data_ingestion.src.simulator_job --tier MASTER --target-match-count 100 --matches-per-player 20
 ./venv/bin/python -m data_ingestion.src.simulator_job --tier GRANDMASTER --target-match-count 100 --matches-per-player 30
 ```
 
-## Deduplication Strategy
+## Chống trùng dữ liệu
 
-This is a key requirement of the project.
+Đây là một yêu cầu quan trọng của dự án.
 
 ### Offline crawler
-- deduplicates by `match_id`
-- checks both `machine_learning/data/raw_matches/` and `raw_timelines/`
-- if the same match is discovered from multiple players, it is stored only once
+- chống trùng theo `match_id`
+- kiểm tra cả dữ liệu đã có sẵn trong `machine_learning/data/raw_matches/` và `raw_timelines/`
+- nếu cùng một trận xuất hiện khi quét từ nhiều người chơi, chỉ lưu 1 lần
 
 ### Real-time ingestion
-- deduplicates by `match_id` across the entire current publishing session
-- if player A and player B are in the same game, that match is published only once
+- chống trùng theo `match_id` trong toàn bộ lượt publish hiện tại
+- nếu A và B cùng chơi một trận thì chỉ publish một bản tin logic cho trận đó
 
-## Recommended Test Order
+## Gợi ý thứ tự test hệ thống
 
-Recommended validation flow:
+Thứ tự test khuyến nghị:
 
 1. `docker compose up -d`
 2. `./venv/bin/python infrastructure/apply_clickhouse_schema.py`
@@ -324,26 +323,26 @@ Recommended validation flow:
 6. `./venv/bin/python -m machine_learning.src.feature_engineering`
 7. `./venv/bin/python -m machine_learning.src.train_xgboost`
 
-## Usage Notes
+## Lưu ý khi sử dụng
 
-- Riot API is rate limited, so larger crawls may take time.
-- `RIOT_API_KEY` is temporary and can expire at any time.
-- `feature_engineering.py` currently builds the dataset from ClickHouse, not directly from raw JSON.
-- To train the model, data must first pass through `stream_processing` and be stored in ClickHouse.
-- The system Python interpreter may not have all required packages installed, so `./venv/bin/python` is recommended.
-- Generated artifacts inside `machine_learning/data/*.csv` and `machine_learning/models/*` usually should not be committed to GitHub unless intentionally included for demo purposes.
+- Riot API có rate limit, nên crawl số lượng lớn sẽ mất thời gian.
+- `RIOT_API_KEY` là key tạm thời, có thể hết hạn bất cứ lúc nào.
+- `feature_engineering.py` hiện tạo dataset từ ClickHouse, không đọc trực tiếp từ raw JSON.
+- Để train được model, bạn cần có dữ liệu đã đi qua `stream_processing` và được ghi vào ClickHouse.
+- `python3` hệ thống có thể thiếu package; nên ưu tiên dùng `./venv/bin/python`.
+- Dữ liệu trong `machine_learning/data/*.csv` và `machine_learning/models/*` thường không nên commit lên GitHub nếu là artifact sinh ra trong quá trình chạy.
 
-## Future Improvements
+## Hướng mở rộng tiếp theo
 
-Some natural next steps for the project:
-- add orchestration via Airflow or Dagster
-- add unit tests and integration tests
-- define stronger Kafka schemas per message type
-- add a feature store or model registry
-- build a complete Metabase dashboard for match analytics and win prediction
-- extend beyond solo queue into pro-play datasets if an appropriate source is available
+Một số hướng phát triển tiếp:
+- thêm orchestration bằng Airflow hoặc Dagster
+- thêm unit tests / integration tests
+- thêm Kafka topic schema rõ ràng hơn cho từng loại message
+- thêm feature store hoặc model registry
+- thêm dashboard Metabase hoàn chỉnh cho match analytics và win prediction
+- mở rộng từ rank solo queue sang giải đấu chuyên nghiệp nếu có nguồn dữ liệu phù hợp
 
-## Tech Stack
+## Tech stack
 
 - Python
 - Riot API
@@ -353,10 +352,10 @@ Some natural next steps for the project:
 - XGBoost
 - Docker Compose
 
-## Author Note
+## Tác giả
 
-This is a portfolio-style Data Engineering project designed around:
-- clean module boundaries
+Đây là một dự án portfolio/Data Engineering project theo hướng production-style refactor, tập trung vào:
+- kiến trúc module rõ ràng
 - stream processing
 - real-time analytics
-- machine learning inference on e-sports match data
+- machine learning inference trên dữ liệu trận đấu e-sports
