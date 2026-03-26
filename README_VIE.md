@@ -1,6 +1,6 @@
 # Real-time E-sports Analytics Pipeline
 
-English version: `README_EN.md`
+English version: `README.md`
 
 Pipeline Data Engineering cho bài toán phân tích trận đấu League of Legends theo hướng real-time, kết hợp:
 - thu thập dữ liệu từ Riot API
